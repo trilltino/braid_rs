@@ -1,0 +1,9 @@
+/target
+/target_temp
+/target_interop
+/cargo_output.txt
+/reference
+/data
+*.lock
+.gemini
+.agent
