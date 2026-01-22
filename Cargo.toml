@@ -1,6 +1,6 @@
 [package]
 name = "braid_rs"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Unified Braid Protocol implementation in Rust, including Braid-HTTP, Antimatter CRDT, and BraidFS."
 license = "MIT OR Apache-2.0"

@@ -10,7 +10,7 @@ A unified Rust implementation of the [Braid Protocol](https://braid.org/) for bu
 
 | Feature | Description |
 |---------|-------------|
-| **Core Braid-HTTP** | Full protocol implementation with SSE subscriptions |
+| **Core Braid-HTTP** | Pure Braid implementation with HTTP 209 subscriptions |
 | **Antimatter CRDT** | JS-compatible CRDT with history compression |
 | **MergeType System** | Pluggable merge algorithms (Sync9, Antimatter, Diamond) |
 | **Braid-Blob** | Content-addressable storage with SHA-256 hashing |
@@ -201,7 +201,7 @@ This implementation follows [draft-toomim-httpbis-braid-http-04](https://datatra
 
 | Header | Support |
 |--------|---------|
-| `Subscribe: true` | ✅ |
+| `Subscribe: true` (HTTP 209) | ✅ |
 | `Version` | ✅ |
 | `Parents` | ✅ |
 | `Merge-Type` | ✅ |
