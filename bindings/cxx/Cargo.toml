@@ -1,0 +1,11 @@
+[package]
+name = "braid-cxx"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cxx = "1.0"
+braid_rs = { path = "../../core", default-features = true }
+
+[build-dependencies]
+cxx-build = "1.0"

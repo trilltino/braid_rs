@@ -1,0 +1,19 @@
+[package]
+name = "braid-node"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# N-API for Node.js bindings
+napi = { version = "2.12", features = ["async", "napi4", "tokio_rt"] }
+napi-derive = "2.12"
+tokio = { version = "1", features = ["full"] }
+
+# The core Braid logic
+braid_rs = { path = "../../core", default-features = true }
+
+[build-dependencies]
+napi-build = "2.0"

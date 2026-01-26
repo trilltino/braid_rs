@@ -1,0 +1,154 @@
+[package]
+name = "braid_rs"
+version = "0.1.3"
+edition = "2021"
+description = "Unified Braid Protocol implementation in Rust, including Braid-HTTP, Antimatter CRDT, and BraidFS."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/braid-org/braid-rs"
+readme = "README.md"
+keywords = ["braid", "http", "crdt", "synchronization", "fs"]
+categories = ["network-programming", "filesystem", "database-implementations"]
+include = [
+    "src/**/*",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE*",
+    "examples/**/*",
+    "tests/**/*",
+]
+
+[features]
+default = [
+    "server",
+    "client",
+    "antimatter",
+    "blob",
+    "fs",
+    "smallvec",
+    "serde",
+    "native",
+    "lz4",
+]
+native = [
+    "dep:tokio",
+    "tokio?/full",
+    "dep:reqwest",
+    "dep:rusqlite",
+    "dep:notify",
+    "dep:clap",
+    "dep:dirs",
+]
+wasm = [
+    "dep:wasm-bindgen",
+    "dep:js-sys",
+    "dep:web-sys",
+    "dep:gloo-net",
+    "dep:gloo-timers",
+    "dep:wasm-bindgen-futures",
+]
+server = [
+    "dep:axum",
+    "dep:tower",
+    "dep:tower-http",
+    "native",
+    "dep:headers",
+    "dep:tokio-stream",
+    "tokio-stream?/net",
+]
+client = []
+antimatter = []
+blob = []
+fs = ["dep:dissimilar"]
+smallvec = []
+serde = []
+lz4 = ["dep:lz4_flex"]
+
+[dependencies]
+# Async Runtime
+tokio = { version = "1.48", optional = true }
+tokio-stream = { version = "0.1", optional = true }
+http = "1.0"
+
+# Optional Server components
+axum = { version = "0.8.8", optional = true }
+headers = { version = "0.4", optional = true }
+tower = { version = "0.5.2", optional = true }
+tower-http = { version = "0.6.8", optional = true }
+
+# Serialization
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.149" }
+
+# Async
+futures = "0.3"
+async-stream = "0.3"
+async-trait = "0.1"
+async-channel = "2.3"
+
+# Utilities
+bytes = { version = "1.5", features = ["serde"] }
+uuid = { version = "1.19.0", features = ["v4", "serde", "js"] }
+tracing = { version = "0.1" }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = { version = "2.0" }
+anyhow = "1.0"
+parking_lot = "0.12"
+base64 = "0.22"
+url = "2.5"
+once_cell = "1.18"
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.9"
+regex = "1.10"
+percent-encoding = "2.3"
+
+# Diamond-Types dependencies (Vendored)
+smartstring = { version = "1.0.1", features = ["serde"] }
+str_indices = "0.4.3"
+smallvec = { version = "2.0.0-alpha.6", features = ["serde"] }
+lazy_static = "1.4.0"
+bumpalo = { version = "3.16.0", features = ["collections"] }
+jumprope = "1.1.2"
+humansize = "2.0.0"
+num_enum = "0.7.2"
+crc = "3.0.0"
+lz4_flex = { version = "0.11.3", optional = true }
+libc = "0.2.139"
+
+# Client
+reqwest = { version = "0.12", features = [
+    "json",
+    "stream",
+    "hickory-dns",
+], optional = true }
+
+# Storage (for blob)
+rusqlite = { version = "0.32", features = ["bundled"], optional = true }
+
+# Filesystem (for fs)
+notify = { version = "6.1", optional = true }
+clap = { version = "4.5", features = ["derive"], optional = true }
+dirs = { version = "5.0", optional = true }
+dissimilar = { version = "1.0.10", optional = true }
+sfv = "0.14.0"
+sha2 = "0.10.9"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { version = "0.2", optional = true }
+js-sys = { version = "0.3", optional = true }
+web-sys = { version = "0.3", features = [
+    "Window",
+    "Performance",
+], optional = true }
+gloo-net = { version = "0.6", optional = true }
+gloo-timers = { version = "0.3", features = ["futures"], optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }
+getrandom = { version = "0.3", features = ["wasm_js"] }
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "braidfs"
+path = "src/bin/braidfs.rs"
+required-features = ["fs", "client"]
