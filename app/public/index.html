@@ -274,32 +274,6 @@
             border: 1px solid #111;
         }
 
-        .app-footer {
-            padding: 16px 32px;
-            background: #0a0a0a;
-            border-top: 1px solid #1a1a1a;
-            flex-shrink: 0;
-        }
-
-        .footer-stats {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            font-size: 12px;
-            color: #444;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stat-value {
-            color: #777;
-            font-weight: 500;
-        }
-
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -442,7 +416,18 @@
                     <button class="back-btn" onclick="window.goToWelcome()">← Back</button>
                     <span class="header-logo">link_iroh</span>
                 </div>
-                <span class="connection-status" id="connection-status">2 peers connected</span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="connect-section"
+                        style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px; border: 1px solid #333;">
+                        <input type="text" id="peer-connect-input" placeholder="Paste peer Node ID..."
+                            style="background: transparent; border: none; color: #fff; font-size: 12px; font-family: monospace; width: 200px; outline: none;">
+                        <button onclick="connectToPeer()"
+                            style="background: #00d4ff; color: #000; border: none; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                            Connect
+                        </button>
+                    </div>
+                    <span class="connection-status" id="connection-status" style="color: #ffaa00;">Not connected</span>
+                </div>
             </div>
         </header>
 
@@ -450,48 +435,37 @@
 
         <main class="app-content">
             <div class="panels-grid">
-                <div class="peer-panel peer-a">
+                <div class="peer-panel peer-a" id="panel-left">
                     <div class="panel-header">
                         <div>
-                            <div class="panel-title">Peer A</div>
+                            <div class="panel-title" id="panel-left-title">Me</div>
                             <div class="panel-peer-id" id="peer-a-id">connecting...</div>
                         </div>
                     </div>
                     <div class="panel-body">
                         <textarea class="sync-textarea" id="textarea-a"
-                            placeholder="Type here to sync with Peer Beta..."></textarea>
+                            placeholder="Initializing..." readonly></textarea>
                         <div class="event-log" id="event-log-a"></div>
                     </div>
                 </div>
 
-                <div class="peer-panel peer-b">
+                <div class="peer-panel peer-b" id="panel-right">
                     <div class="panel-header">
                         <div>
-                            <div class="panel-title">Peer B</div>
-                            <div class="panel-peer-id" id="peer-b-id">connecting...</div>
+                            <div class="panel-title" id="panel-right-title">Other Peer</div>
+                            <div class="panel-peer-id" id="peer-b-id">waiting for connection...</div>
                         </div>
                     </div>
                     <div class="panel-body">
                         <textarea class="sync-textarea" id="textarea-b"
-                            placeholder="Type here to sync with Peer Alpha..."></textarea>
+                            placeholder="Waiting for peer..." readonly></textarea>
                         <div class="event-log" id="event-log-b"></div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <footer class="app-footer">
-            <div class="footer-stats">
-                <div class="stat-item">
-                    <span>Protocol:</span>
-                    <span class="stat-value">Braid-HTTP</span>
-                </div>
-                <div class="stat-item">
-                    <span>Transport:</span>
-                    <span class="stat-value">Iroh QUIC</span>
-                </div>
-            </div>
-        </footer>
+
     </div>
 
     </div>
@@ -515,21 +489,32 @@
                     <button class="back-btn" onclick="window.goToWelcome()">← Back</button>
                     <span class="header-logo">link_iroh <span style="opacity: 0.5">| subscription</span></span>
                 </div>
-                <span class="connection-status">2 peers connected</span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="sub-connect-section"
+                        style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px; border: 1px solid #333;">
+                        <input type="text" id="sub-peer-connect-input" placeholder="Paste peer Node ID..."
+                            style="background: transparent; border: none; color: #fff; font-size: 12px; font-family: monospace; width: 200px; outline: none;">
+                        <button onclick="connectToPeerSub()"
+                            style="background: #00d4ff; color: #000; border: none; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                            Connect
+                        </button>
+                    </div>
+                    <span class="connection-status" id="sub-connection-status" style="color: #ffaa00;">Not connected</span>
+                </div>
             </div>
         </header>
 
         <main class="app-content">
             <div class="panels-grid">
-                <!-- PEER A: PUBLISHER -->
-                <div class="peer-panel peer-a">
+                <!-- LEFT PANEL: Alice (Publisher) / Bob sees Alice here -->
+                <div class="peer-panel peer-a" id="sub-panel-left">
                     <div class="panel-header">
                         <div>
-                            <div class="panel-title">Peer A (Publisher)</div>
+                            <div class="panel-title" id="sub-panel-left-title">Publisher</div>
                             <div class="panel-peer-id" id="sub-peer-a-id">...</div>
                         </div>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel-body" id="sub-panel-left-body">
                         <div style="margin-bottom: 20px;">
                             <label style="display: block; font-size: 12px; color: #888; margin-bottom: 8px;">RESOURCE
                                 NAME</label>
@@ -543,27 +528,28 @@
                     </div>
                 </div>
 
-                <!-- PEER B: SUBSCRIBER -->
-                <div class="peer-panel peer-b">
+                <!-- RIGHT PANEL: Bob (Subscriber) / Alice sees Bob here -->
+                <div class="peer-panel peer-b" id="sub-panel-right">
                     <div class="panel-header">
                         <div>
-                            <div class="panel-title">Peer B (Subscriber)</div>
+                            <div class="panel-title" id="sub-panel-right-title">Subscriber</div>
                             <div class="panel-peer-id" id="sub-peer-b-id">...</div>
                         </div>
                     </div>
-                    <div class="panel-body">
-                        <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-end;">
-                            <div style="flex: 1;">
-                                <label
-                                    style="display: block; font-size: 12px; color: #888; margin-bottom: 8px;">SUBSCRIBE
-                                    TO</label>
-                                <input type="text" id="resource-name-b" value="/my-chat"
-                                    style="width: 100%; background: #050505; border: 1px solid #222; padding: 10px; color: #fff; border-radius: 6px; font-family: monospace;">
+                    <div class="panel-body" id="sub-panel-right-body">
+                        <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;" id="subscriber-controls">
+                            <!-- Input Removed -->
+                            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                                <div style="flex: 1;">
+                                    <label style="display: block; font-size: 12px; color: #888; margin-bottom: 8px;">RESOURCE</label>
+                                    <input type="text" id="resource-name-b" value="/my-chat"
+                                        style="width: 100%; background: #050505; border: 1px solid #222; padding: 10px; color: #fff; border-radius: 6px; font-family: monospace;">
+                                    </div>
+                                    <button class="enter-btn" id="btn-subscribe-b"
+                                        style="margin: 0; padding: 10px 20px; height: 38px; display: flex; align-items: center;">
+                                        Subscribe
+                                    </button>
                             </div>
-                            <button class="enter-btn" id="btn-subscribe-b"
-                                style="margin: 0; padding: 10px 20px; height: 38px; display: flex; align-items: center;">
-                                Subscribe
-                            </button>
                             <button class="enter-btn" id="btn-history-b"
                                 style="margin: 0; margin-left: 10px; padding: 10px 20px; height: 38px; display: flex; align-items: center; background: rgba(255,255,255,0.05);">
                                 History
@@ -627,7 +613,8 @@
             eventsB: [],
             isReady: false,
             mode: 'unknown', // 'update' or 'subscription'
-            viewingHistory: false
+            viewingHistory: false,
+            connectedPeer: null
         };
 
         var appElements = {
@@ -677,13 +664,22 @@
         }
 
         async function setupTauriListeners() {
+            await tauriListen('peer-connected', (event) => {
+                console.log('[link_iroh] Peer connected event:', event.payload);
+                // Refresh peer info to update UI
+                updatePeerInfo(event.payload);
+            });
+
             await tauriListen('sync-received', (event) => {
                 const data = event.payload;
 
                 // Route to correct view based on mode
                 if (appState.mode === 'update') {
+                    // For Alice: peer 'a' is me (left), peer 'b' is other (right)
+                    // For Bob: peer 'a' is other (left), peer 'b' is me (right)
+                    // But we always update the textarea based on data.peer, since the backend
+                    // sends 'a' for Alice's content and 'b' for Bob's content
                     if (data.peer === 'a') {
-                        updateTextarea('a', data.content);
                         updateTextarea('a', data.content);
                         addEvent('a', 'received', `Update received (v${data.version})`);
                     } else if (data.peer === 'b') {
@@ -740,19 +736,137 @@
         function updatePeerInfo(peers) {
             appState.peerAId = peers.peer_a_id;
             appState.peerBId = peers.peer_b_id;
-            // Removed truncation, using full ID
+            appState.nodeName = peers.node_name;
+            appState.isConnected = peers.is_connected;
+            appState.connectedPeer = peers.connected_peer;
+            
             const formatId = (id) => id;
+            const isAlice = peers.node_name === 'alice';
+            const isBob = peers.node_name === 'bob';
 
-            if (appElements.peerAId) {
-                appElements.peerAId.textContent = formatId(peers.peer_a_id);
-                appElements.peerAId.style.fontWeight = 'bold';
-            }
-            if (appElements.peerBId) {
-                appElements.peerBId.textContent = formatId(peers.peer_b_id);
-                appElements.peerBId.style.fontWeight = 'bold';
+            // Update window title based on node name
+            if (isAlice) {
+                document.title = 'Braid-Iroh: Alice';
+            } else if (isBob) {
+                document.title = 'Braid-Iroh: Bob';
             }
 
-            // Also update sub view headers
+            // Update panel titles based on who we are
+            const leftTitle = document.getElementById('panel-left-title');
+            const rightTitle = document.getElementById('panel-right-title');
+            const textareaA = document.getElementById('textarea-a');
+            const textareaB = document.getElementById('textarea-b');
+
+            if (isAlice) {
+                // Alice: Left = Me (editable), Right = Bob (read-only)
+                if (leftTitle) leftTitle.textContent = 'Me (Alice)';
+                if (rightTitle) rightTitle.textContent = peers.is_connected ? 'Bob (Connected)' : 'Bob (Disconnected)';
+                if (textareaA) {
+                    textareaA.placeholder = 'Type here - Alice\'s content...';
+                    textareaA.readOnly = false;
+                }
+                if (textareaB) {
+                    textareaB.placeholder = 'Bob\'s content (read-only)...';
+                    textareaB.readOnly = true;
+                }
+            } else if (isBob) {
+                // Bob: Left = Alice (read-only), Right = Me (editable)
+                if (leftTitle) leftTitle.textContent = peers.is_connected ? 'Alice (Connected)' : 'Alice (Disconnected)';
+                if (rightTitle) rightTitle.textContent = 'Me (Bob)';
+                if (textareaA) {
+                    textareaA.placeholder = 'Alice\'s content (read-only)...';
+                    textareaA.readOnly = true;
+                }
+                if (textareaB) {
+                    textareaB.placeholder = 'Type here - Bob\'s content...';
+                    textareaB.readOnly = false;
+                }
+
+                // For Bob, we need to swap which textareas send updates
+                // Bob types in textarea-b, which should send as 'b'
+                // But we receive Alice's updates in textarea-a
+            } else {
+                // Simulation mode
+                if (leftTitle) leftTitle.textContent = 'Peer A';
+                if (rightTitle) rightTitle.textContent = 'Peer B';
+            }
+
+            // Update connection status
+            const statusEl = document.getElementById('connection-status'); // Assuming 'connection-status' is for the main view
+            const subStatusEl = document.getElementById('sub-connection-status');
+            const mainInput = document.getElementById('peer-connect-input');
+            const subInput = document.getElementById('sub-peer-connect-input');
+
+            if (peers.is_connected) {
+                const statusText = 'Connected to ' + (peers.connected_peer ? peers.connected_peer.substring(0, 8) + '...' : 'peer');
+                if (statusEl) {
+                    statusEl.textContent = statusText;
+                    statusEl.style.color = '#00ff88';
+                }
+
+                // Also update Sub View Status
+                if (subStatusEl) {
+                    subStatusEl.textContent = statusText;
+                    subStatusEl.style.color = '#00ff88';
+                }
+                if (mainInput) mainInput.placeholder = 'Connected!';
+                if (subInput) subInput.placeholder = 'Connected!';
+            } else {
+                const statusText = 'Not connected';
+                if (statusEl) {
+                    statusEl.textContent = statusText;
+                    statusEl.style.color = '#ffaa00';
+                }
+                if (subStatusEl) {
+                    subStatusEl.textContent = statusText;
+                    subStatusEl.style.color = '#ffaa00';
+                }
+                if (mainInput) mainInput.placeholder = 'Paste peer Node ID...';
+                if (subInput) subInput.placeholder = 'Paste peer Node ID...';
+            }
+
+
+            // Update Peer IDs based on Role for P2P Mode
+            if (isAlice) {
+                // Alice: Left Panel is Me (peer_a_id), Right Panel is Bob (connected_peer)
+                if (appElements.peerAId) {
+                    appElements.peerAId.textContent = formatId(peers.peer_a_id);
+                    appElements.peerAId.style.fontWeight = 'bold';
+                }
+                if (appElements.peerBId) {
+                    appElements.peerBId.textContent = peers.is_connected && peers.connected_peer
+                        ? formatId(peers.connected_peer)
+                        : 'Waiting...';
+                    appElements.peerBId.style.fontWeight = 'bold';
+                }
+            } else if (isBob) {
+                // Bob: Left Panel is Alice (connected_peer), Right Panel is Me (peer_a_id)
+                // Left Panel corresponds to peerAId element.
+                if (appElements.peerAId) {
+                    appElements.peerAId.textContent = peers.is_connected && peers.connected_peer
+                        ? formatId(peers.connected_peer)
+                        : 'Waiting...';
+                    appElements.peerAId.style.fontWeight = 'bold';
+                }
+                // Right Panel corresponds to peerBId element.
+                if (appElements.peerBId) {
+                    appElements.peerBId.textContent = formatId(peers.peer_a_id);
+                    appElements.peerBId.style.fontWeight = 'bold';
+                }
+            } else {
+            // Simulation / Fallback
+                if (appElements.peerAId) {
+                    appElements.peerAId.textContent = formatId(peers.peer_a_id);
+                    appElements.peerAId.style.fontWeight = 'bold';
+                }
+                if (appElements.peerBId) {
+                    appElements.peerBId.textContent = formatId(peers.peer_b_id);
+                    appElements.peerBId.style.fontWeight = 'bold';
+                }
+            }
+
+            // Also update sub view headers - defaulting to simulation assumptions
+            // usages below will override based on role (isAlice/isBob)
             if (appElements.subPeerAId) {
                 appElements.subPeerAId.textContent = formatId(peers.peer_a_id);
                 appElements.subPeerAId.style.fontWeight = 'bold';
@@ -760,6 +874,74 @@
             if (appElements.subPeerBId) {
                 appElements.subPeerBId.textContent = formatId(peers.peer_b_id);
                 appElements.subPeerBId.style.fontWeight = 'bold';
+            }
+
+            // Update subscription view based on role
+            const subLeftTitle = document.getElementById('sub-panel-left-title');
+            const subRightTitle = document.getElementById('sub-panel-right-title');
+            const subContentA = document.getElementById('sub-content-a');
+            const subContentB = document.getElementById('sub-content-b');
+            const subscriberControls = document.getElementById('subscriber-controls');
+
+            if (isAlice) {
+                // Alice: I'm the Publisher (left panel editable), Bob is Subscriber (right panel read-only for me)
+                if (subLeftTitle) subLeftTitle.textContent = 'Me (Alice) - Publisher';
+                if (subRightTitle) subRightTitle.textContent = peers.is_connected ? 'Bob - Subscriber (Connected)' : 'Bob - Subscriber (Disconnected)';
+
+                // HIDE the useless right panel for Alice (she only needs to see her publisher content)
+                const rightPanel = document.getElementById('sub-panel-right');
+                if (rightPanel) rightPanel.style.display = 'none';
+
+                // Expand left panel to fill
+                const grid = document.querySelector('.panels-grid');
+                if (grid) grid.style.gridTemplateColumns = '1fr';
+
+                if (subContentA) {
+                    subContentA.placeholder = 'Type here to publish updates...';
+                    subContentA.readOnly = false;
+                }
+                if (subContentB) {
+                    subContentB.placeholder = 'Waiting for Bob to subscribe...';
+                    subContentB.readOnly = true;
+                }
+                // Hide subscribe button for Alice (she's the publisher)
+                if (subscriberControls) subscriberControls.style.display = 'none';
+            } else if (isBob) {
+                // Bob: Alice is Publisher (left panel read-only), I'm Subscriber (right panel shows received)
+                if (subLeftTitle) subLeftTitle.textContent = peers.is_connected ? 'Alice - Publisher (Connected)' : 'Alice - Publisher (Disconnected)';
+                if (subRightTitle) subRightTitle.textContent = 'Me (Bob) - Subscriber';
+
+                // HIDE the useless left panel for Bob (he only needs to see received content)
+                const leftPanel = document.getElementById('sub-panel-left');
+                if (leftPanel) leftPanel.style.display = 'none';
+
+                // Expand right panel to fill
+                const grid = document.querySelector('.panels-grid');
+                if (grid) grid.style.gridTemplateColumns = '1fr';
+
+                if (subContentA) {
+                    subContentA.placeholder = 'Alice publishes here...';
+                    subContentA.readOnly = true;
+                }
+                if (subContentB) {
+                    subContentB.placeholder = 'Waiting for subscription...';
+                    subContentB.readOnly = true;
+                }
+                // Show subscribe button for Bob
+                // Show subscribe button for Bob
+                if (subscriberControls) subscriberControls.style.display = 'flex';
+
+                // CORRECT ID DISPLAY FOR BOB (Subscriber)
+                // Left Panel = Alice (Remote/Connected)
+                // Right Panel = Me (Bob)
+                if (appElements.subPeerAId) {
+                    appElements.subPeerAId.textContent = peers.connected_peer ? formatId(peers.connected_peer) : 'Waiting...';
+                }
+                if (appElements.subPeerBId) {
+                    // In P2P mode, peer_a_id is ME (Bob). peer_b_id is "Waiting...".
+                    // So we must show peer_a_id in the Right Panel (Subscriber/Me)
+                    appElements.subPeerBId.textContent = formatId(peers.peer_a_id);
+                }
             }
         }
 
@@ -781,15 +963,23 @@
             var debounceA, debounceB;
             if (appElements.textareaA) {
                 appElements.textareaA.addEventListener('input', (e) => {
-                    clearTimeout(debounceA);
-                    debounceA = setTimeout(() => sendUpdate('a', e.target.value), 300);
+                    // Only send if this is editable (not read-only)
+                    if (!e.target.readOnly) {
+                        clearTimeout(debounceA);
+                        // Alice sends as 'a', Bob sends as 'a' when typing in Alice's box
+                        debounceA = setTimeout(() => sendUpdate('a', e.target.value), 300);
+                    }
                 });
             }
 
             if (appElements.textareaB) {
                 appElements.textareaB.addEventListener('input', (e) => {
-                    clearTimeout(debounceB);
-                    debounceB = setTimeout(() => sendUpdate('b', e.target.value), 300);
+                    // Only send if this is editable (not read-only)
+                    if (!e.target.readOnly) {
+                        clearTimeout(debounceB);
+                        // Alice sends as 'b', Bob sends as 'b' when typing in Bob's box
+                        debounceB = setTimeout(() => sendUpdate('b', e.target.value), 300);
+                    }
                 });
             }
         }
@@ -798,6 +988,8 @@
             var debounceSubA;
             if (appElements.subContentA) {
                 appElements.subContentA.addEventListener('input', (e) => {
+                    // Only send if editable
+                    if (e.target.readOnly) return;
                     clearTimeout(debounceSubA);
                     debounceSubA = setTimeout(() => {
                         const name = appElements.resourceNameA ? appElements.resourceNameA.value : '/demo-doc';
@@ -809,8 +1001,17 @@
             if (appElements.btnSubscribeB) {
                 appElements.btnSubscribeB.addEventListener('click', () => {
                     const name = appElements.resourceNameB ? appElements.resourceNameB.value : '/demo-doc';
-                    console.log('Subscribing to:', name);
-                    tauriInvoke('run_subscription_demo', { resourceName: name });
+                    // In P2P mode, we use the connected peer if no input is provided
+                    const peerId = appState.peerBId && appState.peerBId !== 'Waiting for connection...' ? appState.peerBId : (appState.connectedPeer || '');
+
+                    // Fallback to connected status from appState if needed
+                    // Logic: If we are Bob, we are connected to Alice.
+                    // The backend run_subscription_demo handles "use connected peer" if we pass null/empty.
+
+                    // We don't need to alert anymore, just try to run it. Backend will error if not connected.
+
+                    console.log('Subscribing to:', name, 'on peer:', peerId);
+                    tauriInvoke('run_subscription_demo', { resourceName: name, peerId: peerId });
                 });
             }
 
@@ -937,12 +1138,6 @@
                     requestAnimationFrame(() => {
                         appElements.subscribeApp.style.opacity = '1';
                         console.log('[link_iroh] Subscription view active');
-
-                        // Auto-subscribe after 1s
-                        setTimeout(() => {
-                            console.log('[link_iroh] Auto-subscribing to /my-chat...');
-                            tauriInvoke('run_subscription_demo', { resourceName: '/my-chat' });
-                        }, 1000);
                     });
                 });
             }, 600);
@@ -973,7 +1168,96 @@
             });
         };
 
+                                                    window.connectToPeer = async function (source) {
+                                                        // source: 'main' or 'sub'
+                                                        let inputId = source === 'sub' ? 'sub-peer-connect-input' : 'peer-connect-input';
+                                                        const input = document.getElementById(inputId);
+                                                        const nodeId = input ? input.value.trim() : '';
+
+                                                        if (!nodeId) {
+                                                            console.error('[link_iroh] No Node ID provided');
+                                                            return;
+                                                        }
+
+                                                        console.log('[link_iroh] Connecting to peer:', nodeId);
+
+                                                        try {
+                                                            const result = await tauriInvoke('connect_peer', { nodeId });
+                                                            console.log('[link_iroh] Connect result:', result);
+
+                                                            // Clear inputs globally
+                                                            const mainInput = document.getElementById('peer-connect-input');
+                                                            const subInput = document.getElementById('sub-peer-connect-input');
+                                                            if (mainInput) { mainInput.value = ''; mainInput.placeholder = 'Connected!'; }
+                                                            if (subInput) { subInput.value = ''; subInput.placeholder = 'Connected!'; }
+
+                                                            setTimeout(() => {
+                                                                if (mainInput) mainInput.placeholder = 'Paste peer Node ID...';
+                                                                if (subInput) subInput.placeholder = 'Paste peer Node ID...';
+                                                            }, 2000);
+
+                                                            // Refresh peer info to update UI
+                                                            await loadPeers();
+                                                        } catch (err) {
+                                                            console.error('[link_iroh] Connect failed:', err);
+                                                            if (input) {
+                                                                input.value = '';
+                                                                input.placeholder = 'Failed - try again';
+                                                                setTimeout(() => {
+                                                                    input.placeholder = 'Paste peer Node ID...';
+                                                                }, 2000);
+                                                            }
+                                                        }
+                                                    };
+
+                                                    window.connectToPeerSub = async function () {
+                                                        // Reuse main connect function
+                                                        await connectToPeer('sub');
+                                                        // Auto-subscribe after connection if strictly needed, but let's let user click subscribe
+                                                        // console.log('[link_iroh] Auto-subscribing after connect...');
+                                                        // await tauriInvoke('run_subscription_demo', { resourceName: '/my-chat' });
+                                                    };
+
+                                                    async function loadPeers() {
+                                                        try {
+                                                            const peers = await tauriInvoke('get_peers');
+                                                            if (peers) {
+                                                                updatePeerInfo(peers);
+                                                            }
+                                                        } catch (error) {
+                                                            console.error('[link_iroh] Failed to load peers:', error);
+                                                        }
+                                                    }
+
+
+
+                                                    // Allow Enter key to trigger connect
+                                                    document.addEventListener('DOMContentLoaded', () => {
+                                                        const connectInput = document.getElementById('peer-connect-input');
+                                                        if (connectInput) {
+                                                            connectInput.addEventListener('keypress', (e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    connectToPeer('main');
+                                                                }
+                                                            });
+                                                        }
+                                                        const subConnectInput = document.getElementById('sub-peer-connect-input');
+                                                        if (subConnectInput) {
+                                                            subConnectInput.addEventListener('keypress', (e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    connectToPeerSub();
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+
         async function sendUpdate(peer, content, resourceName = null) {
+            // Guard: don't send if not connected
+            if (!appState.isConnected) {
+                console.log('[link_iroh] Not connected, skipping send');
+                return;
+            }
+            
             try {
                 // If in update mode (default), use standard logs
                 if (appState.mode === 'update') {
