@@ -1,3 +1,9 @@
 [workspace]
-members = ["app", "core", "references/*"]
+members = [
+    "app",
+    "core",
+    "references/iroh-gossip",
+    "references/iroh-h3/iroh-h3-axum",
+    "references/iroh-h3/iroh-h3-client",
+]
 resolver = "2"

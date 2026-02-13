@@ -14,7 +14,6 @@ opt-level = 3
 panic = 'abort'
 incremental = false
 
-[workspace.lints.rust]
 missing_debug_implementations = "warn"
 
 # We use this --cfg for documenting the cargo features on which an API
@@ -31,5 +30,4 @@ unexpected_cfgs = { level = "warn", check-cfg = [
   "cfg(iroh_loom)",
 ] }
 
-[workspace.lints.clippy]
 unused-async = "warn"
