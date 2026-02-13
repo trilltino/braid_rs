@@ -1,0 +1,64 @@
+name: Build and Release
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: install dependencies (macOS only)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          # The macOS build usually doesn't need extra system libs for static frontends
+          # but just in case:
+          # brew install libsoup webkit2gtk-4.0 # (Linux specific, but for context)
+          echo "Ready to build on macOS"
+
+      - name: install tauri cli
+        run: cargo install tauri-cli
+
+      - name: build app
+        run: |
+          cd app
+          # We use --no-bundle if we just want the binary, 
+          # but let's do a full bundle for a professional feel
+          cargo tauri build
+
+      - name: upload production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: braid-iroh-${{ matrix.platform }}
+          path: |
+            app/target/release/bundle/dmg/*.dmg
+            app/target/release/bundle/msi/*.msi
+            app/target/release/braid_iroh.exe
+            app/target/release/braid_iroh
+
+      - name: Push to Braid.org (Windows)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          curl -X PUT "https://braid.org/tino_iroh_exe" \
+            -H "Cookie: signed-auth=bp4mu28l6nany4eiez1z3iftg0gmrdg" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@app/target/release/braid_iroh.exe"
+
+      - name: Push to Braid.org (macOS)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          curl -X PUT "https://braid.org/tino_iroh_mac" \
+            -H "Cookie: signed-auth=bp4mu28l6nany4eiez1z3iftg0gmrdg" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@app/target/release/braid_iroh"

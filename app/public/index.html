@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>link_iroh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #welcome-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+            z-index: 1000;
+        }
+
+        #welcome-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .welcome-container {
+            text-align: center;
+            padding: 48px;
+        }
+
+        .welcome-logo {
+            font-family: 'Inter', sans-serif;
+            font-size: 38px;
+            font-weight: 600;
+            letter-spacing: 0;
+            margin-bottom: 48px;
+            color: #ffffff;
+        }
+
+        .enter-btn {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            padding: 12px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            border-radius: 100px;
+            outline: none;
+            user-select: none;
+            -webkit-user-select: none;
+            margin-top: 20px;
+        }
+
+        .enter-btn:hover {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .enter-btn:active {
+            transform: translateY(0);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #main-app {
+            position: fixed;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            background: #000;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 15px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #main-app.visible,
+        #subscribe-app.visible {
+            display: flex;
+        }
+
+        .app-header {
+            background: #0a0a0a;
+            border-bottom: 1px solid #1a1a1a;
+            padding: 16px 32px;
+            flex-shrink: 0;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .connection-status {
+            font-size: 13px;
+            color: #00ff88;
+        }
+
+
+
+        .app-content {
+            flex: 1;
+            padding: 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panels-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+        }
+
+        @media (max-width: 1100px) {
+            .panels-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .peer-panel {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+            transition: border-color 0.3s ease;
+        }
+
+        .peer-panel:hover {
+            border-color: #333;
+        }
+
+        .peer-panel.peer-a {
+            --peer-color: #00d4ff;
+        }
+
+        .peer-panel.peer-b {
+            --peer-color: #ff00d4;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .panel-peer-id {
+            font-size: 11px;
+            color: #555;
+            margin-top: 4px;
+            font-family: 'SF Mono', monospace;
+        }
+
+        .panel-badge {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--peer-color);
+            background: rgba(var(--peer-color-rgb), 0.1);
+            border: 1px solid var(--peer-color);
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .panel-body {
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 0;
+        }
+
+        .sync-textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 300px;
+            padding: 20px;
+            background: #050505;
+            border: 1px solid #222;
+            border-radius: 12px;
+            color: #eee;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .sync-textarea:focus {
+            outline: none;
+            border-color: var(--peer-color);
+            background: #080808;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .event-log {
+            height: 160px;
+            overflow-y: auto;
+            border-radius: 10px;
+            background: #050505;
+            padding: 12px;
+            border: 1px solid #111;
+        }
+
+        .app-footer {
+            padding: 16px 32px;
+            background: #0a0a0a;
+            border-top: 1px solid #1a1a1a;
+            flex-shrink: 0;
+        }
+
+        .footer-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            font-size: 12px;
+            color: #444;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            color: #777;
+            font-weight: 500;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #222;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #333;
+        }
+
+        #subscribe-app {
+            position: fixed;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            background: #000;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .version-modal {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.visible .version-modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 24px;
+            padding: 0 8px;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .version-list {
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .version-item {
+            padding: 12px;
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .version-item:hover {
+            background: #1a1a1a;
+            border-color: #444;
+        }
+
+        .version-id {
+            font-family: monospace;
+            color: #00d4ff;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="welcome-screen">
+        <div class="welcome-container">
+            <h1 class="welcome-logo">link_iroh.</h1>
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <button class="enter-btn" id="enter-btn">Update Demo</button>
+                <button class="enter-btn" id="sub-demo-btn">Subscribe Demo</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <header class="app-header">
+            <div class="header-content">
+                <div style="display: flex; align-items: center;">
+                    <button class="back-btn" onclick="window.goToWelcome()">← Back</button>
+                    <span class="header-logo">link_iroh</span>
+                </div>
+                <span class="connection-status" id="connection-status">2 peers connected</span>
+            </div>
+        </header>
+
+
+
+        <main class="app-content">
+            <div class="panels-grid">
+                <div class="peer-panel peer-a">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Peer A</div>
+                            <div class="panel-peer-id" id="peer-a-id">connecting...</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <textarea class="sync-textarea" id="textarea-a"
+                            placeholder="Type here to sync with Peer Beta..."></textarea>
+                        <div class="event-log" id="event-log-a"></div>
+                    </div>
+                </div>
+
+                <div class="peer-panel peer-b">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Peer B</div>
+                            <div class="panel-peer-id" id="peer-b-id">connecting...</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <textarea class="sync-textarea" id="textarea-b"
+                            placeholder="Type here to sync with Peer Alpha..."></textarea>
+                        <div class="event-log" id="event-log-b"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="footer-stats">
+                <div class="stat-item">
+                    <span>Protocol:</span>
+                    <span class="stat-value">Braid-HTTP</span>
+                </div>
+                <div class="stat-item">
+                    <span>Transport:</span>
+                    <span class="stat-value">Iroh QUIC</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    </div>
+
+    <div class="modal-overlay" id="history-modal">
+        <div class="version-modal">
+            <div class="modal-header">
+                <div class="modal-title">Version History</div>
+                <button class="modal-close" onclick="closeHistory()">×</button>
+            </div>
+            <div class="version-list" id="version-list">
+                <!-- Items populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <div id="subscribe-app">
+        <header class="app-header">
+            <div class="header-content">
+                <div style="display: flex; align-items: center;">
+                    <button class="back-btn" onclick="window.goToWelcome()">← Back</button>
+                    <span class="header-logo">link_iroh <span style="opacity: 0.5">| subscription</span></span>
+                </div>
+                <span class="connection-status">2 peers connected</span>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <div class="panels-grid">
+                <!-- PEER A: PUBLISHER -->
+                <div class="peer-panel peer-a">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Peer A (Publisher)</div>
+                            <div class="panel-peer-id" id="sub-peer-a-id">...</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-size: 12px; color: #888; margin-bottom: 8px;">RESOURCE
+                                NAME</label>
+                            <input type="text" id="resource-name-a" value="/my-chat"
+                                style="width: 100%; background: #050505; border: 1px solid #222; padding: 10px; color: #fff; border-radius: 6px; font-family: monospace;">
+                        </div>
+
+                        <label style="display: block; font-size: 12px; color: #888; margin-bottom: 8px;">CONTENT</label>
+                        <textarea class="sync-textarea" id="sub-content-a" style="min-height: 200px;"
+                            placeholder="Type here to publish updates..."></textarea>
+                    </div>
+                </div>
+
+                <!-- PEER B: SUBSCRIBER -->
+                <div class="peer-panel peer-b">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Peer B (Subscriber)</div>
+                            <div class="panel-peer-id" id="sub-peer-b-id">...</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-end;">
+                            <div style="flex: 1;">
+                                <label
+                                    style="display: block; font-size: 12px; color: #888; margin-bottom: 8px;">SUBSCRIBE
+                                    TO</label>
+                                <input type="text" id="resource-name-b" value="/my-chat"
+                                    style="width: 100%; background: #050505; border: 1px solid #222; padding: 10px; color: #fff; border-radius: 6px; font-family: monospace;">
+                            </div>
+                            <button class="enter-btn" id="btn-subscribe-b"
+                                style="margin: 0; padding: 10px 20px; height: 38px; display: flex; align-items: center;">
+                                Subscribe
+                            </button>
+                            <button class="enter-btn" id="btn-history-b"
+                                style="margin: 0; margin-left: 10px; padding: 10px 20px; height: 38px; display: flex; align-items: center; background: rgba(255,255,255,0.05);">
+                                History
+                            </button>
+                            <button class="enter-btn" id="btn-resume-b"
+                                style="margin: 0; margin-left: 10px; padding: 10px 20px; height: 38px; display: none; align-items: center; background: rgba(0, 255, 136, 0.2); color: #00ff88; border-color: #00ff88;">
+                                Resume Live
+                            </button>
+                        </div>
+
+                        <label style="display: block; font-size: 12px; color: #888; margin-bottom: 8px;">RECEIVED
+                            CONTENT</label>
+                        <textarea class="sync-textarea" id="sub-content-b" style="min-height: 200px;" readonly
+                            placeholder="Waiting for subscription..."></textarea>
+
+                        <div style="margin-top: 20px;">
+                            <h3 style="font-size: 12px; color: #666; margin-bottom: 8px; text-transform: uppercase;">
+                                Network Log</h3>
+                            <div class="event-log" id="sub-event-log" style="height: 150px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ======================================================================
+        // TAURI API SAFETY CHECK
+        // ======================================================================
+
+        function getTauri() {
+            return window.__TAURI__;
+        }
+
+        var appIsTauri = !!getTauri();
+        console.log(`[link_iroh] Environment: ${appIsTauri ? 'Native (Tauri)' : 'Browser'}`);
+
+        // Safe access to Tauri commands
+        async function tauriInvoke(cmd, args = {}) {
+            if (appIsTauri && window.__TAURI__.core) {
+                return window.__TAURI__.core.invoke(cmd, args);
+            }
+            console.log(`[link_iroh] Mock Invoke: ${cmd}`, args);
+            return Promise.resolve({ success: true, version: 1, peer_a_id: 'mock-a', peer_b_id: 'mock-b' });
+        }
+
+        // Safe access to Tauri events
+        async function tauriListen(name, cb) {
+            if (appIsTauri && window.__TAURI__.event) {
+                return window.__TAURI__.event.listen(name, cb);
+            }
+            console.log(`[link_iroh] Mock Listen: ${name}`);
+            return Promise.resolve(() => { });
+        }
+
+        var appState = {
+            peerAId: null,
+            peerBId: null,
+            eventsA: [],
+            eventsB: [],
+            isReady: false,
+            mode: 'unknown', // 'update' or 'subscription'
+            viewingHistory: false
+        };
+
+        var appElements = {
+            welcomeScreen: document.getElementById('welcome-screen'),
+            mainApp: document.getElementById('main-app'),
+            subscribeApp: document.getElementById('subscribe-app'),
+            enterBtn: document.getElementById('enter-btn'),
+            subDemoBtn: document.getElementById('sub-demo-btn'),
+            // execSubBtn: document.getElementById('exec-sub-btn'), // REMOVED
+            peerAId: document.getElementById('peer-a-id'),
+            peerBId: document.getElementById('peer-b-id'),
+            textareaA: document.getElementById('textarea-a'),
+            textareaB: document.getElementById('textarea-b'),
+            eventLogA: document.getElementById('event-log-a'),
+            eventLogB: document.getElementById('event-log-b'),
+
+            // Sub Demo Elements
+            subPeerAId: document.getElementById('sub-peer-a-id'),
+            subPeerBId: document.getElementById('sub-peer-b-id'),
+            resourceNameA: document.getElementById('resource-name-a'),
+            resourceNameB: document.getElementById('resource-name-b'),
+            subContentA: document.getElementById('sub-content-a'),
+            subContentB: document.getElementById('sub-content-b'),
+            subContentB: document.getElementById('sub-content-b'),
+            btnSubscribeB: document.getElementById('btn-subscribe-b'),
+            btnHistoryB: document.getElementById('btn-history-b'),
+            btnResumeB: document.getElementById('btn-resume-b'),
+            subEventLog: document.getElementById('sub-event-log'),
+
+            // Modal
+            historyModal: document.getElementById('history-modal'),
+            versionList: document.getElementById('version-list')
+        };
+
+        async function initialize() {
+            try {
+                await setupTauriListeners();
+                await loadPeers();
+                setupUIHandlers();
+                setupSubUIHandlers();
+                appState.isReady = true;
+                console.log('[link_iroh] Initialization complete');
+            } catch (err) {
+                console.error('[link_iroh] Initialization failed:', err);
+                setupUIHandlers();
+            }
+        }
+
+        async function setupTauriListeners() {
+            await tauriListen('sync-received', (event) => {
+                const data = event.payload;
+
+                // Route to correct view based on mode
+                if (appState.mode === 'update') {
+                    if (data.peer === 'a') {
+                        updateTextarea('a', data.content);
+                        updateTextarea('a', data.content);
+                        addEvent('a', 'received', `Update received (v${data.version})`);
+                    } else if (data.peer === 'b') {
+                        updateTextarea('b', data.content);
+                        addEvent('b', 'received', `Update received (v${data.version})`);
+                    }
+                } else if (appState.mode === 'subscription') {
+                    // In sub mode, only Peer B receives from subscription
+                    if (data.peer === 'b' && appElements.subContentB) {
+                        if (appState.viewingHistory) {
+                            // Ignore update if viewing history
+                            console.log('[link_iroh] Update ignored while viewing history');
+                            return;
+                        }
+                        appElements.subContentB.value = data.content;
+                        // Flash effect
+                        appElements.subContentB.style.borderColor = '#00ff88';
+                        setTimeout(() => appElements.subContentB.style.borderColor = '#222', 200);
+                    }
+                }
+            });
+
+            await tauriListen('network-event', (event) => {
+                const data = event.payload;
+                if (appState.mode === 'subscription' && appElements.subEventLog) {
+                    const time = new Date(data.timestamp).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                    let colorClass = 'cyan';
+                    if (data.event_type === 'error') colorClass = 'magenta';
+                    if (data.event_type === 'success') colorClass = 'emerald';
+
+                    appElements.subEventLog.innerHTML = `
+                        <div class="event-item ${data.event_type}">
+                            <div class="event-dot ${colorClass}" style="background-color: var(--${colorClass}, #00d4ff);"></div>
+                            <span class="event-message">[${data.peer.toUpperCase()}] ${data.message}</span>
+                            <span class="event-time">${time}</span>
+                        </div>
+                    ` + appElements.subEventLog.innerHTML;
+                }
+            });
+        }
+
+        async function loadPeers() {
+            try {
+                const peers = await tauriInvoke('get_peers');
+                if (peers && peers.peer_a_id) {
+                    updatePeerInfo(peers);
+                }
+            } catch (error) {
+                console.error('[link_iroh] Failed to load peers:', error);
+            }
+        }
+
+        function updatePeerInfo(peers) {
+            appState.peerAId = peers.peer_a_id;
+            appState.peerBId = peers.peer_b_id;
+            // Removed truncation, using full ID
+            const formatId = (id) => id;
+
+            if (appElements.peerAId) {
+                appElements.peerAId.textContent = formatId(peers.peer_a_id);
+                appElements.peerAId.style.fontWeight = 'bold';
+            }
+            if (appElements.peerBId) {
+                appElements.peerBId.textContent = formatId(peers.peer_b_id);
+                appElements.peerBId.style.fontWeight = 'bold';
+            }
+
+            // Also update sub view headers
+            if (appElements.subPeerAId) {
+                appElements.subPeerAId.textContent = formatId(peers.peer_a_id);
+                appElements.subPeerAId.style.fontWeight = 'bold';
+            }
+            if (appElements.subPeerBId) {
+                appElements.subPeerBId.textContent = formatId(peers.peer_b_id);
+                appElements.subPeerBId.style.fontWeight = 'bold';
+            }
+        }
+
+        function setupUIHandlers() {
+            if (appElements.enterBtn) {
+                appElements.enterBtn.addEventListener('click', () => {
+                    window.enterApplication();
+                });
+            }
+
+            if (appElements.subDemoBtn) {
+                appElements.subDemoBtn.addEventListener('click', () => {
+                    window.enterSubscriptionApp();
+                });
+            }
+
+            // REMOVED execSubBtn handler
+
+            var debounceA, debounceB;
+            if (appElements.textareaA) {
+                appElements.textareaA.addEventListener('input', (e) => {
+                    clearTimeout(debounceA);
+                    debounceA = setTimeout(() => sendUpdate('a', e.target.value), 300);
+                });
+            }
+
+            if (appElements.textareaB) {
+                appElements.textareaB.addEventListener('input', (e) => {
+                    clearTimeout(debounceB);
+                    debounceB = setTimeout(() => sendUpdate('b', e.target.value), 300);
+                });
+            }
+        }
+
+        function setupSubUIHandlers() {
+            var debounceSubA;
+            if (appElements.subContentA) {
+                appElements.subContentA.addEventListener('input', (e) => {
+                    clearTimeout(debounceSubA);
+                    debounceSubA = setTimeout(() => {
+                        const name = appElements.resourceNameA ? appElements.resourceNameA.value : '/demo-doc';
+                        sendUpdate('a', e.target.value, name);
+                    }, 300);
+                });
+            }
+
+            if (appElements.btnSubscribeB) {
+                appElements.btnSubscribeB.addEventListener('click', () => {
+                    const name = appElements.resourceNameB ? appElements.resourceNameB.value : '/demo-doc';
+                    console.log('Subscribing to:', name);
+                    tauriInvoke('run_subscription_demo', { resourceName: name });
+                });
+            }
+
+            if (appElements.btnHistoryB) {
+                appElements.btnHistoryB.addEventListener('click', () => {
+                    const name = appElements.resourceNameB ? appElements.resourceNameB.value : '/demo-doc';
+                    openHistory(name);
+                });
+            }
+
+            if (appElements.btnResumeB) {
+                appElements.btnResumeB.addEventListener('click', () => {
+                    resumeLive();
+                });
+            }
+        }
+
+        async function openHistory(resourceName) {
+            if (!appElements.historyModal) return;
+
+            appElements.versionList.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">Loading...</div>';
+            appElements.historyModal.classList.add('visible');
+
+            try {
+                const versions = await tauriInvoke('get_version_history', { resourceName });
+                renderHistory(resourceName, versions);
+            } catch (err) {
+                appElements.versionList.innerHTML = `<div style="padding:20px; text-align:center; color:#ff4444;">Error: ${err}</div>`;
+            }
+        }
+
+        function renderHistory(resourceName, versions) {
+            if (!versions || versions.length === 0) {
+                appElements.versionList.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">No versions found.</div>';
+                return;
+            }
+
+            appElements.versionList.innerHTML = '';
+            versions.forEach((ver, index) => {
+                const el = document.createElement('div');
+                el.className = 'version-item';
+                el.innerHTML = `
+                    <span class="version-id">${ver.substring(0, 8)}...</span>
+                    <span style="font-size:11px; color:#555;">${index === 0 ? 'Latest' : 'Older'}</span>
+                 `;
+                el.onclick = () => loadVersion(resourceName, ver);
+                appElements.versionList.appendChild(el);
+            });
+        }
+
+        async function loadVersion(resourceName, versionId) {
+            try {
+                const content = await tauriInvoke('get_version_content', { resourceName, versionId });
+                if (appElements.subContentB) {
+                    appElements.subContentB.value = content;
+
+                    // Set State: Viewing History
+                    appState.viewingHistory = true;
+                    if (appElements.btnResumeB) {
+                        appElements.btnResumeB.style.display = 'flex';
+                    }
+
+                    // Visual feedback
+                    appElements.subContentB.style.borderColor = '#00d4ff';
+                }
+                closeHistory();
+            } catch (err) {
+                console.error("Failed to load version:", err);
+            }
+        }
+
+        function resumeLive() {
+            console.log('[link_iroh] Resuming live sync...');
+            appState.viewingHistory = false;
+            if (appElements.btnResumeB) {
+                appElements.btnResumeB.style.display = 'none';
+            }
+            if (appElements.subContentB) {
+                appElements.subContentB.value = "Resumed live sync... waiting for updates.";
+                appElements.subContentB.style.borderColor = '#222';
+            }
+        }
+
+        window.closeHistory = function () {
+            if (appElements.historyModal) {
+                appElements.historyModal.classList.remove('visible');
+            }
+        };
+
+        window.enterApplication = function () {
+            console.log('[link_iroh] Entering update application...');
+            appState.mode = 'update';
+
+            // UI Transition
+            appElements.welcomeScreen.style.opacity = '0';
+            appElements.welcomeScreen.style.transition = 'opacity 0.6s ease-out';
+
+            setTimeout(() => {
+                appElements.welcomeScreen.style.display = 'none';
+                appElements.mainApp.classList.add('visible');
+
+                requestAnimationFrame(() => {
+                    appElements.mainApp.style.opacity = '1';
+                    console.log('[link_iroh] Update view active');
+                });
+            }, 600);
+
+            tauriInvoke('initialize_p2p').catch(err => console.error('P2P Init Error:', err));
+        };
+
+        window.enterSubscriptionApp = function () {
+            console.log('[link_iroh] Entering subscription application...');
+            appState.mode = 'subscription';
+
+            // UI Transition
+            appElements.welcomeScreen.style.opacity = '0';
+            appElements.welcomeScreen.style.transition = 'opacity 0.6s ease-out';
+
+            setTimeout(() => {
+                appElements.welcomeScreen.style.display = 'none';
+                appElements.subscribeApp.classList.add('visible');
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        appElements.subscribeApp.style.opacity = '1';
+                        console.log('[link_iroh] Subscription view active');
+
+                        // Auto-subscribe after 1s
+                        setTimeout(() => {
+                            console.log('[link_iroh] Auto-subscribing to /my-chat...');
+                            tauriInvoke('run_subscription_demo', { resourceName: '/my-chat' });
+                        }, 1000);
+                    });
+                });
+            }, 600);
+
+            tauriInvoke('initialize_p2p').catch(err => console.error('P2P Init Error:', err));
+
+        };
+
+        window.goToWelcome = function () {
+            console.log('[link_iroh] Returning to welcome screen...');
+            appState.mode = 'unknown';
+
+            // Hide apps
+            appElements.mainApp.classList.remove('visible');
+            appElements.subscribeApp.classList.remove('visible');
+            appElements.mainApp.style.opacity = '0';
+            appElements.subscribeApp.style.opacity = '0';
+
+            // Show welcome
+            appElements.welcomeScreen.style.display = 'flex';
+            // Slight delay to allow display:flex to apply before opacity transition
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    appElements.welcomeScreen.style.opacity = '1';
+                    appElements.welcomeScreen.style.visibility = 'visible';
+                    appElements.welcomeScreen.style.pointerEvents = 'all';
+                });
+            });
+        };
+
+        async function sendUpdate(peer, content, resourceName = null) {
+            try {
+                // If in update mode (default), use standard logs
+                if (appState.mode === 'update') {
+                    addEvent(peer, 'sent', 'Sending...');
+                }
+
+                const result = await tauriInvoke('send_update', {
+                    payload: {
+                        peer: peer,
+                        content: content,
+                        resource_name: resourceName
+                    }
+                });
+
+                if (result && result.version) {
+                    if (appState.mode === 'update') {
+                        addEvent(peer, 'sent', `Update sent (v${result.version})`);
+                    }
+                }
+            } catch (error) {
+                console.error('[link_iroh] Send failed:', error);
+                if (appState.mode === 'update') {
+                    addEvent(peer, 'error', 'Send failed');
+                }
+            }
+        }
+
+        function updateTextarea(peer, content) {
+            // Only update in default mode
+            if (appState.mode !== 'update') return;
+
+            const textarea = peer === 'a' ? appElements.textareaA : appElements.textareaB;
+            if (textarea && textarea.value !== content) {
+                const pos = textarea.selectionStart;
+                const atEnd = pos === textarea.value.length;
+                textarea.value = content;
+                if (!atEnd) textarea.setSelectionRange(pos, pos);
+            }
+        }
+
+        function addEvent(peer, type, message) {
+            const eventLog = peer === 'a' ? appElements.eventLogA : appElements.eventLogB;
+            const eventsList = peer === 'a' ? appState.eventsA : appState.eventsB;
+            if (!eventLog) return;
+
+            eventsList.unshift({
+                type: type,
+                message: message,
+                time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            });
+
+            if (eventsList.length > 20) eventsList.pop();
+
+            eventLog.innerHTML = eventsList.map(e => `
+                <div class="event-item ${e.type}">
+                    <div class="event-dot"></div>
+                    <span class="event-message">${e.message}</span>
+                    <span class="event-time">${e.time}</span>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,171 @@
+/* braid_iroh — dark theme for the Leptos P2P demo */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e1e4e8;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+/* ── Header ─────────────────────────────────────── */
+
+header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.status {
+    font-size: 0.8rem;
+    color: #4ade80;
+    margin-top: 4px;
+}
+
+.status::before {
+    content: '●';
+    margin-right: 6px;
+}
+
+.status.disconnected {
+    color: #f87171;
+}
+
+/* ── Peer Panels ────────────────────────────────── */
+
+.panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.peer-panel {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    transition: border-color 0.2s;
+}
+
+.peer-panel:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.peer-panel h2 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.peer-id {
+    font-size: 0.7rem;
+    color: #888;
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    margin-bottom: 12px;
+    user-select: all;
+}
+
+/* ── Textarea ───────────────────────────────────── */
+
+.peer-panel textarea {
+    width: 100%;
+    height: 140px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #e1e4e8;
+    padding: 10px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.85rem;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.peer-panel textarea:focus {
+    border-color: rgba(124, 58, 237, 0.5);
+}
+
+/* ── Event Log ──────────────────────────────────── */
+
+.event-log {
+    margin-top: 12px;
+    font-size: 0.7rem;
+    color: #888;
+    max-height: 100px;
+    overflow-y: auto;
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+}
+
+.event-log div {
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.event-log .sent {
+    color: #7c3aed;
+}
+
+.event-log .recv {
+    color: #06b6d4;
+}
+
+/* ── Info Bar ───────────────────────────────────── */
+
+.info-bar {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.7rem;
+    color: #555;
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+}
+
+/* ── Loading ────────────────────────────────────── */
+
+.loading {
+    text-align: center;
+    color: #888;
+    padding: 40px;
+    font-size: 0.9rem;
+}
+
+.loading::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+
+    0%,
+    20% {
+        content: '';
+    }
+
+    40% {
+        content: '.';
+    }
+
+    60% {
+        content: '..';
+    }
+
+    80%,
+    100% {
+        content: '...';
+    }
+}
