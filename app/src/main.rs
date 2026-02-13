@@ -20,6 +20,7 @@ use uuid::Uuid;
 mod discovery;
 mod node;
 mod protocol;
+mod proxy;
 mod subscription;
 
 use crate::discovery::DiscoveryConfig;
@@ -515,6 +516,7 @@ async fn initialize_network() -> (
     let peer_a = BraidIrohNode::spawn(BraidIrohConfig {
         discovery: discovery.clone(),
         secret_key: None,
+        proxy_config: None,
     })
     .await
     .expect("Failed to spawn Peer A");
@@ -522,10 +524,17 @@ async fn initialize_network() -> (
 
     discovery.add_node(peer_a.node_addr().await.unwrap());
 
-    println!("[INIT] Spawning Peer B...");
+    println!("[INIT] Spawning Peer B (with Proxy)...");
     let peer_b = BraidIrohNode::spawn(BraidIrohConfig {
         discovery: discovery.clone(),
         secret_key: None,
+        #[cfg(feature = "proxy")]
+        proxy_config: Some(crate::node::ProxyConfig {
+            listen_addr: "127.0.0.1:8080".parse().unwrap(),
+            default_peer: peer_a.node_id(), 
+        }),
+        #[cfg(not(feature = "proxy"))]
+        proxy_config: None,
     })
     .await
     .expect("Failed to spawn Peer B");

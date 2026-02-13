@@ -30,6 +30,19 @@ pub struct BraidIrohConfig {
     /// Optional pre-generated secret key for a stable identity.
     /// If `None`, a random identity is generated.
     pub secret_key: Option<SecretKey>,
+
+    /// Optional configuration for the TCP proxy bridge.
+    pub proxy_config: Option<ProxyConfig>,
+}
+
+
+/// Configuration for the TCP proxy bridge.
+#[derive(Clone)]
+pub struct ProxyConfig {
+    /// Local address to listen on (e.g. 127.0.0.1:8080).
+    pub listen_addr: std::net::SocketAddr,
+    /// Default peer ID to forward requests to.
+    pub default_peer: EndpointId,
 }
 
 impl Default for BraidIrohConfig {
@@ -37,6 +50,7 @@ impl Default for BraidIrohConfig {
         Self {
             discovery: DiscoveryConfig::Mock(MockDiscoveryMap::new()),
             secret_key: None,
+            proxy_config: None,
         }
     }
 }
@@ -102,6 +116,23 @@ impl BraidIrohNode {
             .accept(BRAID_H3_ALPN.to_vec(), braid_handler)
             .accept(iroh_gossip::net::GOSSIP_ALPN.to_vec(), gossip.clone())
             .spawn();
+
+        // 5. Start TCP Proxy if configured (Phase 4)
+        #[cfg(feature = "proxy")]
+        if let Some(proxy_conf) = config.proxy_config {
+            let endpoint_clone = endpoint.clone();
+            tokio::spawn(async move {
+                if let Err(e) = crate::proxy::bridge::start_proxy(
+                    &endpoint_clone,
+                    proxy_conf.listen_addr,
+                    proxy_conf.default_peer,
+                )
+                .await
+                {
+                    tracing::error!("TCP Proxy failed: {}", e);
+                }
+            });
+        }
 
         Ok(Self {
             endpoint,

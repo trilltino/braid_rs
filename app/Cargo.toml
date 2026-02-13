@@ -12,6 +12,10 @@ path = "src/main.rs"
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
+[features]
+default = ["proxy"]
+proxy = []
+
 [dependencies]
 # Tauri v2 Core
 tauri = { version = "2", features = [] }
@@ -55,4 +59,4 @@ uuid = { version = "1", features = ["v4"] }
 parking_lot = "0.12"
 
 [dev-dependencies]
-rand = "0.8"
+rand = "0.10.0"
