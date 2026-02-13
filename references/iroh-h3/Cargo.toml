@@ -1,8 +1,3 @@
-[workspace]
-members = ["iroh-h3", "iroh-h3-client", "iroh-h3-axum", "example"]
-
-resolver = "2"
-
 [workspace.package]
 edition = "2024"
 license = "MIT"
