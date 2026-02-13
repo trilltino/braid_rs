@@ -1,0 +1,7 @@
+target/
+**/target/
+*.lock
+.gemini
+.agent
+node_modules/
+dist/
