@@ -1,7 +1,4 @@
-#![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
-)]
+// Console window enabled for all platforms (released or debug)
 
 //! Braid-Iroh Native Tauri v2 Application
 //!
@@ -28,9 +25,7 @@ use crate::node::{BraidIrohConfig, BraidIrohNode};
 
 use iroh_h3_client::IrohH3Client;
 
-// =============================================================================
-// EVENT TYPES - Native Tauri Events (No SSE, No Fetch)
-// =============================================================================
+
 
 /// Emitted when peers are discovered and connected
 #[derive(Clone, Debug, Serialize)]

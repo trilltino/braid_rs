@@ -47,18 +47,14 @@ jobs:
             app/target/release/braid_iroh.exe
             app/target/release/braid_iroh
 
-      - name: Push to Braid.org (Windows)
-        if: matrix.platform == 'windows-latest'
-        run: |
-          curl -X PUT "https://braid.org/tino_iroh_exe" \
-            -H "Cookie: signed-auth=bp4mu28l6nany4eiez1z3iftg0gmrdg" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary "@app/target/release/braid_iroh.exe"
-
-      - name: Push to Braid.org (macOS)
-        if: matrix.platform == 'macos-latest'
-        run: |
-          curl -X PUT "https://braid.org/tino_iroh_mac" \
-            -H "Cookie: signed-auth=bp4mu28l6nany4eiez1z3iftg0gmrdg" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary "@app/target/release/braid_iroh"
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            app/target/release/braid_iroh.exe
+            app/target/release/braid_iroh
+            app/target/release/bundle/dmg/*.dmg
+            app/target/release/bundle/msi/*.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
