@@ -30,3 +30,14 @@ A publisher-subscriber model demonstration. One peer (Alice) acts as the publish
 - **Networking**: Iroh (P2P, QUIC, Gossip, Direct Connections)
 - **Protocol**: Braid-HTTP (State Synchronization, Versioning)
 - **Build System**: Cargo (Rust), Github Actions (CI/CD)
+
+## Running the Demo
+
+The application includes a built-in launcher for easy testing.
+
+1.  **Double-click `braid_iroh.exe`**: The application will automatically spawn two separate instances ("Alice" and "Bob") in their own terminal windows.
+2.  **Manual Mode**: You can also run individual nodes manually via command line:
+    ```bash
+    ./braid_iroh --p2p --name alice
+    ./braid_iroh --p2p --name bob
+    ```
