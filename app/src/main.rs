@@ -1,3 +1,4 @@
+#![windows_subsystem = "console"]
 // Console window enabled for all platforms (released or debug)
 
 //! Braid-Iroh Native Tauri v2 Application
