@@ -88,6 +88,10 @@ impl BraidIrohNode {
             DiscoveryConfig::Mock(map) => {
                 builder = builder.address_lookup(map);
             }
+            DiscoveryConfig::Real => {
+                // Default Iroh discovery is already enabled by default in Endpoint::builder()
+                // unless we override it. So we do nothing here.
+            }
         }
 
         let endpoint = builder.bind().await?;
@@ -159,7 +163,12 @@ impl BraidIrohNode {
         url: &str,
         bootstrap: Vec<EndpointId>,
     ) -> anyhow::Result<GossipReceiver> {
+        println!("[NODE] Subscribing to {} with {} bootstrap peers", url, bootstrap.len());
+        for peer in &bootstrap {
+            println!("[NODE]   bootstrap: {}", peer);
+        }
         let (_sender, receiver) = self.subscription_mgr.subscribe(url, bootstrap).await?;
+        println!("[NODE] Subscribed successfully to {}", url);
         Ok(receiver)
     }
 
@@ -175,7 +184,7 @@ impl BraidIrohNode {
         }
         if let Some(body) = &update.body {
             println!("Content-Length: {}", body.len());
-            println!("");
+            println!();
             println!("{}", String::from_utf8_lossy(body));
         }
         println!("----------------------------------------\n");
@@ -254,5 +263,14 @@ impl BraidIrohNode {
     /// Access the iroh endpoint (for advanced usage).
     pub fn endpoint(&self) -> &Endpoint {
         &self.endpoint
+    }
+
+    /// Join additional peers to an existing gossip topic.
+    pub async fn join_peers(&self, url: &str, peers: Vec<EndpointId>) -> anyhow::Result<()> {
+        println!("[NODE] Joining {} peers to topic {}", peers.len(), url);
+        for peer in &peers {
+            println!("[NODE]   joining: {}", peer);
+        }
+        self.subscription_mgr.join_peers(url, peers).await
     }
 }

@@ -11,7 +11,7 @@
   "app": {
     "windows": [
       {
-        "title": "Braid Iroh P2P",
+        "title": "Braid Iroh P2P - Starting...",
         "width": 1200,
         "height": 800,
         "resizable": true,

@@ -1,131 +1,42 @@
-# Braid-Iroh
+# App Component
 
-Braid-HTTP over Iroh P2P networking — decentralized state synchronization with real-time debug visibility.
+This directory contains the main desktop application code, built with Tauri v2 and Rust.
 
-## Quick Start (One Script)
+## Purpose
 
-### Windows (Command Prompt)
-```cmd
-cd braid_iroh
-run.bat
-```
+The app serves as the user interface and the integration point for the Braid-Iroh P2P system. It bridges the frontend (HTML/JS) with the backend Rust logic.
 
-### Windows (PowerShell)
-```powershell
-cd braid_iroh
-.\run.ps1
-```
+## Structure
 
-That's it! The script will:
-- Compile and run the application
-- Show real-time P2P debug output with color coding
-- Display a legend explaining what each color means
+### src/
 
-## Usage Modes
+- main.rs
+  - The entry point of the application.
+  - Manages the Tauri application lifecycle.
+  - Defines Tauri commands callable from the frontend.
+  - Handles the initialization of the P2P node.
 
-```cmd
-:: Run the application (default)
-run.bat
+- node.rs
+  - Encapsulates the logic for spawning and managing the Iroh node.
+  - Configures the Iroh endpoint and gossip protocol.
 
-:: Run tests with debug output
-run.bat test
+- subscription.rs
+  - Implements the Braid subscription logic.
+  - Handles the flow of updates between peers.
 
-:: Run the two-peers example (no browser needed)
-run.bat example
+- discovery.rs
+  - Manages peer discovery mechanisms (e.g., local network discovery).
 
-:: Run with cargo-leptos (if installed)
-run.bat leptos
-```
+- proxy.rs
+  - Handles proxying requests if applicable.
 
-## Debug Output Explained
+- p2p_init_clean.rs
+  - Contains initialization logic for P2P networking.
 
-When you run the script, you'll see color-coded output:
+## Frontend
 
-- **C** (Cyan) - Connection events: QUIC handshake, peer connects, endpoint binding
-- **G** (Magenta) - Gossip events: topic subscriptions, broadcasts, membership changes
-- **P** (Green) - PUT operations: saving/updating data, versioning, broadcasting to peers
-- **R** (Yellow) - GET operations: retrieving data, HTTP/3 requests
-- **E** (Red) - Errors and failures: connection failures, protocol errors
-- **I** (Gray) - General information
+The frontend assets are located in the `public` directory.
 
-### Example Session
-
-```
-[C] Endpoint bound id=z6Mkf...x9Qr              <- Your peer identity
-[G] Subscribing to topic=7f3a...e2b1            <- Joining gossip topic
-[P] PUT /demo-doc version=v2                    <- You typed something
-[P] Broadcasting via gossip                     <- Sending to peers
-[G] Received gossip message from=z6Mkh...      <- Peer received it
-```
-
-## Project Structure
-
-```
-braid_iroh/
-├── run.bat              <- Main script (CMD)
-├── run.ps1              <- Main script (PowerShell)
-├── src/
-│   ├── lib.rs           # Public API
-│   ├── main.rs          # Entry point
-│   ├── node.rs          # BraidIrohNode (main type)
-│   ├── discovery.rs     # Peer discovery
-│   ├── subscription.rs  # Gossip subscriptions
-│   └── protocol.rs      # HTTP/3 protocol handler
-├── tests/               # Integration tests
-│   ├── test_node.rs
-│   ├── test_two_peers.rs
-│   └── ...
-├── examples/
-│   └── two_peers_debug.rs  # Standalone demo
-└── TESTING_PLAN.md      # Testing documentation
-```
-
-## Manual Build (Without Script)
-
-```bash
-# Run with debug logging
-set RUST_LOG=braid_iroh=debug,iroh_gossip=debug
-cargo run
-
-# Or run tests
-cargo test
-
-# Run the example
-cargo run --example two_peers_debug
-```
-
-## Running Tests
-
-```cmd
-:: Run all tests
-run.bat test
-
-:: Or with cargo directly
-cargo test
-```
-
-## Documentation
-
-- `TESTING_PLAN.md` — Comprehensive testing strategy
-- `braid_iroh_plan.md` — Original architecture plan
-
-## Architecture Overview
-
-```
-+-------------------------------------------------------------+
-|                       braid_iroh                            |
-|  +------------+    +----------+    +---------------------+  |
-|  | braid_http |<-->  iroh-h3 |<--> | iroh (QUIC P2P)     |  |
-|  |  (types)   |    | (HTTP/3) |    | - endpoints         |  |
-|  +------------+    +----------+    | - gossip topics     |  |
-|                                    | - peer discovery    |  |
-|  +-----------------+               +---------------------+  |
-|  |  iroh-gossip    |                                         |
-|  |  (broadcast)    |                                         |
-|  +-----------------+                                         |
-+-------------------------------------------------------------+
-```
-
-## License
-
-MIT OR Apache-2.0
+- public/index.html
+  - The main user interface file.
+  - Contains the logic for the "Update Demo" and "Subscription Demo" views.

@@ -34,10 +34,22 @@ impl SubscriptionManager {
         }
     }
 
+    /// Normalize a URL for consistent topic lookup.
+    /// Ensures the URL starts with / and has no trailing /.
+    fn normalize_url(url: &str) -> String {
+        if url.starts_with('/') {
+            url.trim_end_matches('/').to_string()
+        } else {
+            format!("/{}", url.trim_end_matches('/'))
+        }
+    }
+
     /// Derive a deterministic TopicId from a resource URL.
     /// Any peer hashing the same URL gets the same topic.
+    /// Normalizes the URL to ensure consistency.
     pub fn topic_for_url(url: &str) -> TopicId {
-        let hash = blake3::hash(url.as_bytes());
+        let normalized = Self::normalize_url(url);
+        let hash = blake3::hash(normalized.as_bytes());
         TopicId::from_bytes(*hash.as_bytes())
     }
 
@@ -51,7 +63,8 @@ impl SubscriptionManager {
         url: &str,
         bootstrap: Vec<EndpointId>,
     ) -> anyhow::Result<(GossipSender, GossipReceiver)> {
-        let topic_id = Self::topic_for_url(url);
+        let normalized = Self::normalize_url(url);
+        let topic_id = Self::topic_for_url(&normalized);
         let topic: GossipTopic = self.gossip.subscribe(topic_id, bootstrap).await?;
         let (sender, receiver) = topic.split();
 
@@ -59,7 +72,7 @@ impl SubscriptionManager {
         self.topics
             .lock()
             .await
-            .insert(url.to_string(), sender.clone());
+            .insert(normalized, sender.clone());
 
         Ok((sender, receiver))
     }
@@ -67,24 +80,40 @@ impl SubscriptionManager {
     /// Broadcast a Braid Update to all peers on a resource's gossip topic.
     /// Serializes the update to JSON bytes before sending.
     pub async fn broadcast(&self, url: &str, update: &Update) -> anyhow::Result<()> {
+        let normalized = Self::normalize_url(url);
+        let bytes = serde_json::to_vec(update)?;
+        self.broadcast_raw(&normalized, Bytes::from(bytes)).await
+    }
+    
+    /// Broadcast raw bytes to all peers on a resource's gossip topic.
+    /// This allows sending wrapped messages with metadata.
+    pub async fn broadcast_raw(&self, url: &str, data: Bytes) -> anyhow::Result<()> {
+        let normalized = Self::normalize_url(url);
         let mut topics = self.topics.lock().await;
+
+        println!("[BROADCAST] url={} normalized={} topics_count={}", url, normalized, topics.len());
+        for (k, _) in topics.iter() {
+            println!("[BROADCAST]   known topic: {}", k);
+        }
 
         // If we don't have a sender for this topic, join it (with no bootstrap peers)
         // This allows us to publish to a topic we haven't explicitly subscribed to
-        if !topics.contains_key(url) {
-            let topic_id = Self::topic_for_url(url);
+        if !topics.contains_key(&normalized) {
+            println!("[BROADCAST] Creating new topic for {}", normalized);
+            let topic_id = Self::topic_for_url(&normalized);
             // Join with empty bootstrap peers since we are likely the publisher/origin
             let topic: GossipTopic = self.gossip.subscribe(topic_id, vec![]).await?;
             let (sender, _receiver) = topic.split();
 
             // We discard the receiver because we don't necessarily want to listen to our own updates
             // (or maybe we do? but for now just enable publishing)
-            topics.insert(url.to_string(), sender);
+            topics.insert(normalized.clone(), sender);
         }
 
-        if let Some(sender) = topics.get(url) {
-            let bytes = serde_json::to_vec(update)?;
-            sender.broadcast(Bytes::from(bytes)).await?;
+        if let Some(sender) = topics.get(&normalized) {
+            println!("[BROADCAST] Sending {} bytes to topic {}", data.len(), normalized);
+            sender.broadcast(data).await?;
+            println!("[BROADCAST] Broadcast complete for {}", normalized);
         }
         Ok(())
     }
@@ -93,6 +122,19 @@ impl SubscriptionManager {
     #[allow(dead_code)]
     pub fn gossip(&self) -> &Gossip {
         &self.gossip
+    }
+
+    /// Join additional peers to an existing topic.
+    /// This is useful for connecting to a peer after initial subscription.
+    pub async fn join_peers(&self, url: &str, peers: Vec<EndpointId>) -> anyhow::Result<()> {
+        let normalized = Self::normalize_url(url);
+        let topics = self.topics.lock().await;
+        if let Some(sender) = topics.get(&normalized) {
+            sender.join_peers(peers).await?;
+            Ok(())
+        } else {
+            anyhow::bail!("Topic not found: {}", normalized)
+        }
     }
 }
 

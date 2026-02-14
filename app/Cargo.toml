@@ -57,6 +57,8 @@ anyhow = "1"
 thiserror = "2"
 uuid = { version = "1", features = ["v4"] }
 parking_lot = "0.12"
+clap = { version = "4", features = ["derive"] }
+rand = "0.9"
 
 [dev-dependencies]
 rand = "0.10.0"

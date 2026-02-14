@@ -110,9 +110,8 @@ struct UpdateResponse {
     version: String,
 }
 
-// =============================================================================
-// TAURI COMMANDS - Native Rust Commands (No HTTP, No SSE)
-// =============================================================================
+
+// TAURI COMMANDS - 
 
 /// Command: Get peer information
 #[tauri::command]

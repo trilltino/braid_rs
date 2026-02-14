@@ -159,13 +159,16 @@ async fn handle_put(
             println!("{}: {}", name, value.to_str().unwrap_or("???"));
         }
     }
-    println!("");
+    println!();
     println!("{}", body);
     println!("----------------------------------------\n");
 
-    // Parse the incoming update (simplified: treat body as snapshot content)
-    // In a real implementation, we would parse headers to determine if this is a patch or snapshot
-    let version = Version::String(uuid::Uuid::new_v4().to_string());
+    // Parse the incoming update from headers
+    let version = headers
+        .get("version")
+        .and_then(|v| v.to_str().ok())
+        .map(|v| Version::String(v.to_string()))
+        .unwrap_or_else(|| Version::String(uuid::Uuid::new_v4().to_string()));
     let update = Update::snapshot(version, Bytes::from(body.clone().into_bytes()));
 
     // Store locally

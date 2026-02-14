@@ -20,6 +20,8 @@ pub enum DiscoveryConfig {
     /// In-memory discovery — peers register themselves in a shared map.
     /// Use this for tests and the Leptos demo (both peers on the same machine).
     Mock(MockDiscoveryMap),
+    /// Use Iroh's real discovery (DNS, Pkarr, MDNS).
+    Real,
 }
 
 impl DiscoveryConfig {
@@ -31,9 +33,11 @@ impl DiscoveryConfig {
 
     /// Register a node's address so other peers using the same mock can find it.
     pub fn add_node(&self, node_addr: EndpointAddr) {
-        let DiscoveryConfig::Mock(map) = self;
-        let info = EndpointInfo::from(node_addr);
-        map.add_node(info.endpoint_id, info.data);
+        if let DiscoveryConfig::Mock(map) = self {
+            let info = EndpointInfo::from(node_addr);
+            map.add_node(info.endpoint_id, info.data);
+        }
+        // DiscoveryConfig::Real doesn't need explicit registration - uses Iroh's built-in discovery
     }
 }
 
