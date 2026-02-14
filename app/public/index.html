@@ -679,12 +679,25 @@
                     // For Bob: peer 'a' is other (left), peer 'b' is me (right)
                     // But we always update the textarea based on data.peer, since the backend
                     // sends 'a' for Alice's content and 'b' for Bob's content
+                    const isAlice = appState.nodeName === 'alice';
+                    const isBob = appState.nodeName === 'bob';
+
+                    // Prevent self-overwrite (e.g. if we get a loopback message or erroneous peer label)
+                    if (isAlice && data.peer === 'a') {
+                        console.log('[link_iroh] Ignoring update for self (Alice)');
+                        return;
+                    }
+                    if (isBob && data.peer === 'b') {
+                        console.log('[link_iroh] Ignoring update for self (Bob)');
+                        return;
+                    }
+
                     if (data.peer === 'a') {
                         updateTextarea('a', data.content);
-                        addEvent('a', 'received', `Update received (v${data.version})`);
+                        addEvent('a', 'received', `Update from A (v${data.version})`);
                     } else if (data.peer === 'b') {
                         updateTextarea('b', data.content);
-                        addEvent('b', 'received', `Update received (v${data.version})`);
+                        addEvent('b', 'received', `Update from B (v${data.version})`);
                     }
                 } else if (appState.mode === 'subscription') {
                     // In sub mode, only Peer B receives from subscription
