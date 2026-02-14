@@ -74,4 +74,13 @@ This mode tests resource subscriptions and version history.
 4.  **Verify**:
     - Bob's text area should update with Alice's content.
     - As Alice types, Bob receives updates in real-time.
-    - Click **History** on Bob's side to view and load previous versions of the content.
+## Deployment & Multiple Machines
+
+### Does it work on other machines?
+**Yes!** The application is built on **Iroh**, which handles NAT traversal and peer discovery automatically. You can run Alice on one computer and Bob on another (even on different Wi-Fi networks), and they will be able to connect using their **Node IDs**.
+
+### Is Docker required?
+**No.** The application compiles to a standalone binary (executable). You do not need Docker or any other runtime environment. Simply copy the `braid_iroh.exe` file to another machine and run it.
+
+### Cross-Platform
+While this demo is built for Windows (`.exe`), the underlying Rust code is cross-platform. You can compile it for macOS or Linux using `cargo build --release` on those machines.
