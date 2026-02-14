@@ -41,3 +41,37 @@ The application includes a built-in launcher for easy testing.
     ./braid_iroh --p2p --name alice
     ./braid_iroh --p2p --name bob
     ```
+
+## Using the Demo
+
+Once the two windows (Alice and Bob) are open, follow these steps to test the functionality.
+
+### 1. Update Demo (Bidirectional Sync)
+This mode tests real-time P2P updates.
+
+1.  Click **Update Demo** in both Alice and Bob windows.
+2.  **Connect Peers**:
+    - Copy Bob's **Node ID** (displayed at the top of his window).
+    - Paste it into Alice's **Connect** input field at the top right.
+    - Click **Connect**. The status should change to "Connected".
+3.  **Test Sync**:
+    - Type in Alice's text box (Left Panel).
+    - Watch the text appear instantly in Bob's read-only text box (Left Panel).
+    - Type in Bob's text box (Right Panel).
+    - Watch the text appear in Alice's read-only text box (Right Panel).
+
+### 2. Subscription Demo (Pub/Sub)
+This mode tests resource subscriptions and version history.
+
+1.  Click **Subscribe Demo** in both windows.
+2.  **Alice (Publisher)**:
+    - In the Left Panel ("Me - Publisher"), enter a **Resource Name** (e.g., `/chat`).
+    - Type content into the text area. This content is now being published.
+3.  **Bob (Subscriber)**:
+    - Ensure you are connected to Alice (if not, use the Connect box at top right).
+    - In the Right Panel ("Me - Subscriber"), enter the *same* **Resource Name** (`/chat`).
+    - Click **Subscribe**.
+4.  **Verify**:
+    - Bob's text area should update with Alice's content.
+    - As Alice types, Bob receives updates in real-time.
+    - Click **History** on Bob's side to view and load previous versions of the content.
